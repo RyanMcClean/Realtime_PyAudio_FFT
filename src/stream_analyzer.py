@@ -3,8 +3,9 @@ import time, math, scipy
 from collections import deque
 from scipy.signal import savgol_filter
 
-from src.fft import getFFT
-from src.utils import *
+from .fft import getFFT
+from .utils import *
+from .stream_reader_pyaudio import Stream_Reader
 
 class Stream_Analyzer:
     """
@@ -39,20 +40,12 @@ class Stream_Analyzer:
         self.height = height
         self.window_ratio = window_ratio
 
-        try:
-            from src.stream_reader_pyaudio import Stream_Reader
-            self.stream_reader = Stream_Reader(
-                device  = device,
-                rate    = rate,
-                updates_per_second  = updates_per_second,
-                verbose = verbose)
-        except:
-            from src.stream_reader_sounddevice import Stream_Reader
-            self.stream_reader = Stream_Reader(
-                device  = device,
-                rate    = rate,
-                updates_per_second  = updates_per_second,
-                verbose = verbose)
+        self.stream_reader = Stream_Reader(
+            device  = device,
+            rate    = rate,
+            updates_per_second  = updates_per_second,
+            verbose = verbose)
+
 
         self.rate = self.stream_reader.rate
 
@@ -64,7 +57,7 @@ class Stream_Analyzer:
         if self.apply_frequency_smoothing:
             self.filter_width = round_up_to_even(0.03*self.n_frequency_bins) - 1
         if self.visualize:
-            from src.visualizer import Spectrum_Visualizer
+            from .visualizer import Spectrum_Visualizer
 
         self.FFT_window_size = round_up_to_even(self.rate * FFT_window_size_ms / 1000)
         self.FFT_window_size_ms = 1000 * self.FFT_window_size / self.rate
@@ -175,9 +168,8 @@ class Stream_Analyzer:
                 avg_fft_delay = 1000.*np.mean(np.array(self.delays))
                 avg_data_capture_delay = 1000.*np.mean(np.array(self.stream_reader.data_capture_delays))
                 data_fps = self.stream_reader.num_data_captures / (time.time() - self.stream_reader.stream_start_time)
-                print("\nAvg fft  delay: %.2fms  -- avg data delay: %.2fms" %(avg_fft_delay, avg_data_capture_delay))
-                print("Num data captures: %d (%.2ffps)-- num fft computations: %d (%.2ffps)"
-                    %(self.stream_reader.num_data_captures, data_fps, self.num_ffts, self.fft_fps))
+                print("Avg fft  delay: %.2fms  -- avg data delay: %.2fms Num data captures: %d (%.2ffps)-- num fft computations: %d (%.2ffps)" %(avg_fft_delay, avg_data_capture_delay, self.stream_reader.num_data_captures, data_fps, self.num_ffts, self.fft_fps), end='\r')
+
 
             if self.visualize and self.visualizer._is_running:
                 self.visualizer.update()
