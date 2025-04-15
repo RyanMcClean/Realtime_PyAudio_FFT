@@ -86,8 +86,6 @@ class Stream_Reader:
                     stream_callback=self.non_blocking_stream_read,
                 )
         except:
-            import traceback
-            print(traceback.format_exc())
             self.pa.terminate()
             sys.exit()
 
