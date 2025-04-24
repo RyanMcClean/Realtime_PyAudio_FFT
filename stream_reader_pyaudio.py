@@ -24,7 +24,14 @@ class Stream_Reader:
 
     """
 
-    def __init__(self, device=None, rate=None, updates_per_second=1000, FFT_window_size=None, verbose=False):
+    def __init__(
+        self,
+        device=None,
+        rate=None,
+        updates_per_second=1000,
+        FFT_window_size=None,
+        verbose=False,
+    ):
         self.rate = rate
         self.verbose = verbose
         self.pa = pyaudio.PyAudio()
@@ -89,13 +96,22 @@ class Stream_Reader:
             self.pa.terminate()
             sys.exit()
 
-        print("\n##################################################################################################")
+        print(
+            "\n##################################################################################################"
+        )
         print("\nDefaulted to using first working mic, Running on:")
         self.print_mic_info(self.device)
-        print("\n##################################################################################################")
+        print(
+            "\n##################################################################################################"
+        )
         print(
             "Recording from %s at %d Hz\nUsing (non-overlapping) data-windows of %d samples (updating at %.2ffps)"
-            % (self.info["name"], self.rate, self.update_window_n_frames, self.updates_per_second)
+            % (
+                self.info["name"],
+                self.rate,
+                self.update_window_n_frames,
+                self.updates_per_second,
+            )
         )
 
     def non_blocking_stream_read(self, in_data, frame_count, time_info, status):
@@ -121,7 +137,9 @@ class Stream_Reader:
         else:
             self.data_windows_to_buffer = int(data_windows_to_buffer)
 
-        self.data_buffer = numpy_data_buffer(self.data_windows_to_buffer, self.update_window_n_frames)
+        self.data_buffer = numpy_data_buffer(
+            self.data_windows_to_buffer, self.update_window_n_frames
+        )
 
         print("\n-- Starting live audio stream...\n")
         self.stream.start_stream()
@@ -133,7 +151,9 @@ class Stream_Reader:
         self.stream.close()
         self.pa.terminate()
 
-    def valid_low_rate(self, device, test_rates=[96000, 48000, 44100, 22050, 11025], test_rate=None):
+    def valid_low_rate(
+        self, device, test_rates=[96000, 48000, 44100, 22050, 11025], test_rate=None
+    ):
         """Set the rate to the lowest supported audio rate."""
         test_rates.append(test_rate)
         for testrate in test_rates:
@@ -147,7 +167,10 @@ class Stream_Reader:
         if self.test_device(device, rate=default_rate):
             return default_rate
 
-        print("SOMETHING'S WRONG! I can't figure out a good sample-rate for DEVICE =>", device)
+        print(
+            "SOMETHING'S WRONG! I can't figure out a good sample-rate for DEVICE =>",
+            device,
+        )
         return False
 
     def test_device(self, device, rate=None):
